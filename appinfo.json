@@ -6,15 +6,13 @@
         ""
     ],
     "companyName": "MakeAwesomeHappen",
-    "longName": "onlinestatus-pebble",
+    "longName": "atpebble",
     "projectType": "native",
     "resources": {
         "media": [
-            {
-            }
         ]
     },
-    "shortName": "OS-P",
+    "shortName": "ATP",
     "uuid": "dbdd5d06-f8a9-41b2-89a0-b6e0c81525be",
     "versionCode": 1,
     "versionLabel": "1.0",
