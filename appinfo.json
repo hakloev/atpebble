@@ -11,9 +11,6 @@
     "resources": {
         "media": [
             {
-                "file": "fonts/BebasNeue.otf",
-                "name": "FONT_BEBAS_NEUE_54_BOLD",
-                "type": "font"
             }
         ]
     },
