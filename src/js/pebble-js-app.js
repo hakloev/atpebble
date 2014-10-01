@@ -1,119 +1,81 @@
-var stopurl = "http://bybussen.api.tmn.io/rt/";
-var allstops = "http://bybussen.api.tmn.io/stops";
+var Bus = ( function () {
+    
+    var busInfoUrl = "http://bybussen.api.tmn.io/rt/";
 
-var xmlreq = function(url, type, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.onload = function () {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            console.log('Callback called in xhr');
-            callback(this.responseText);
-        } else {
-            console.log('Error with xmlreq');
-        }
-    };
-    xhr.open(type, url, false);
-    xhr.send();
-}
-
-function getPosition() {
-    navigator.geolocation.getCurrentPosition(
-        locationSuccess,
-        locationFailed,
-        {enableHighAccuracy: true, timeout: 10000, maximumAge: 0}
-    );
-}
-
-function locationFailed(err) {
-    console.log("JS could not get location");
-}
-
-function locationSuccess(pos) {
-    console.log('Position: ' + pos.coords.latitude + ' / ' + pos.coords.longitude);
-
-    xmlreq(allstops, 'GET', 
-        function(responseText) {
-            //parse and send
-            var json = JSON.parse(responseText);
-            
-            var stopDict = haversine(json, pos);
-            
-            var stopTimes;
-            xmlreq(stopurl + stopDict["stopid"] , 'GET',
+    return {
+        getBusInfo: function(place) {
+            var self = this; // Needed to access parseInfo in callback function
+            this.xmlReq(busInfoUrl + place, "GET", 
                 function(responseText) {
-                    stopTimes = JSON.parse(responseText);
-                }    
-            );
-
-             var dict = {
-                "0": stopDict["stopname"],
-                "1": stopTimes.next[0].l,
-            }
-            
-            if (stopTimes.next[0]) {
-                dict["2"] = 'L' + stopTimes.next[0].l + ': '+ stopTimes.next[0].t.substring(11,16) + ' ' + stopTimes.next[0].d
-            }
-            if (stopTimes.next[1]) {
-                dict["3"] = 'L' + stopTimes.next[1].l + ': '+ stopTimes.next[1].t.substring(11,16) + ' ' + stopTimes.next[1].d
-            }
-
-            Pebble.sendAppMessage(dict, 
-                function(e) {
-                    console.log("Bus info sent");
-                },
-                function(e) {
-                    console.log("Error while sending bus info");
+                    var json = JSON.parse(responseText);
+                    self.parseInfo(json);
                 }
             );
+        },
+        xmlReq: function(url, type, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    console.log('INFO: Callback in XMLHttpRequest');
+                    callback(this.responseText);
+                } else {
+                    console.log('ERROR: XMLHttpRequest failed, nothing to display in DOM');
+                }
+            };
+            xhr.open(type, url, true);
+            xhr.send();
+        }, 
+        parseInfo: function(place) {
+            console.log("INFO: parseInfo called");
+            var departureList = [];
+            for (var i = 0; i < place.next.length; i++) {
+                if (place.next[i].l == "5") {
+                    departureList.push(place.next[i]);
+                }
+                if (departureList.length == 3) {
+                    break;
+                }
+            }
+            this.printInfo(departureList);
+        }, 
+        printInfo: function(list) {
+            console.log("INFO: printInfo called");
+            var dictionary = {}; 
+            for (var i = 0; i < list.length; i++) {
+                console.log(list[i].t.substring(11, 16) + " - " + this.calcTime(list[i].t));
+                dictionary[i] = list[i].t.substring(11, 16) + " - " + this.calcTime(list[i].t);
+            }
+            Pebble.sendAppMessage(dictionary,
+                function(e) {
+                    console.log("Sent departures to pebble");
+                },
+                function(e) {
+                     console.log("Error while sending departures to pebble");   
+                }
+            );
+        },
+        calcTime: function(time) {
+            console.log("INFO: calcTime called");
+            var d = time.match(/^(\d{2}).(\d{2}).(\d{4}) (\d{2}):(\d{2})$/);
+            var today = new Date();
+            var departure = new Date(d[3], d[2] - 1, d[1], d[4], d[5]);
+            var diff = Math.floor((departure.getTime() - today.getTime()) / (1000 * 60));
+            if (diff <= -1 || diff <= 0) {
+                return "ca nå";
+            } else {
+                return "ca " + diff + " min";
+            }   
         }
-    );
-}
-
-Number.prototype.toRad = function() {
-    return this * Math.PI / 180;
-}
-
-function haversine(stops, pos) {
-    var currentNearest = 100;
-    var currentStop = 'begin';
-    var currentStopName = 'begin';
-
-    for (var i = 0; i < stops.length; i++) {
-        var lat1 = pos.coords.latitude;
-        var lat2 = stops[i]['latitude'];
-
-        var lon1 = pos.coords.longitude;
-        var lon2 = stops[i]['longitude'];
-
-        var R = 6371;
-        var x1 = lat2 - lat1;
-        var dLat = x1.toRad();
-        var x2 = lon2 - lon1;
-        var dLon = x2.toRad();
-        var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) *
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        var d = R * c;
-
-        if (d < currentNearest) {
-            currentNearest = d;
-            currentStop = stops[i]['locationId'];
-            currentStopName = stops[i]['name'];
-            console.log('Curr nearest ' + currentStopName + ' / ' + d);
-        }
-    }
-    return {"stopname": currentStopName.substring(0, 16), 
-            "stopid": currentStop, 
-            "stopdist": d};
-}
-
+    };
+}());
 
 Pebble.addEventListener('ready',
     function(e) {
         console.log("JS ready to recieve");
-
         // initial fetch here
-        getPosition();
+        Bus.getBusInfo("16011567");
+        Bus.getBusInfo("16011192");
+        
     }        
 );
 
@@ -121,6 +83,7 @@ Pebble.addEventListener('appmessage',
     function(e) {
         console.log("AppMessage received from Pebble");
         // fetch here
-        getPosition();
+        Bus.getBusInfo("16011567");
+        Bus.getBusInfo("16011192");
     }      
 );
