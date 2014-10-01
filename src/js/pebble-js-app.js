@@ -105,3 +105,13 @@ Pebble.addEventListener('appmessage',
         Bus.getBusInfo();
     }      
 );
+
+Pebble.addEventListener('showConfiguration', function() {
+    console.log("showing configmenu");
+});
+
+Pebble.addEventListener('webviewclosed', function(e) {
+    console.log("config closed");
+    var options = JSON.parse(decodeURIComponent(e.response));
+    console.log("Options: " + JSON.stringify(options));
+});

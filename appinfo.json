@@ -3,14 +3,13 @@
         "dummy": 0
     },
     "capabilities": [
-        ""
+        "configurable"
     ],
     "companyName": "MakeAwesomeHappen",
     "longName": "atpebble",
     "projectType": "native",
     "resources": {
-        "media": [
-        ]
+        "media": []
     },
     "shortName": "ATP",
     "uuid": "dbdd5d06-f8a9-41b2-89a0-b6e0c81525be",
