@@ -1,8 +1,8 @@
 #include <pebble.h>
 
-#define KEY_BUSID_BERG 0
-#define KEY_BUSID_ILA 1
-
+#define KEY_BUSID_0 0
+#define KEY_BUSID_1 1
+    
 static Window *window;
 static TextLayer *stopname_layer_berg;
 static TextLayer *stopname_layer_ila;
@@ -19,11 +19,6 @@ void accel_tap_handler(AccelAxisType axis, int32_t direction) {
     app_message_outbox_send();
 }
 
-static void line_layer_update(Layer *layer, GContext *ctx) {
-    graphics_context_set_fill_color(ctx, GColorWhite);
-    graphics_fill_rect(ctx, layer_get_bounds(layer), 0, GCornerNone);
-}
-
 static void main_window_load(Window *window) {
     window_set_background_color(window, GColorBlack);
 
@@ -32,14 +27,14 @@ static void main_window_load(Window *window) {
 
     // Origin = coordinate of upper-lefthand corner of rectangle
     // Size = size of rectangle
-    stopname_layer_berg = text_layer_create((GRect) { .origin = { 0, 5 }, .size = { bounds.size.w, 42 } });
+    stopname_layer_berg = text_layer_create((GRect) { .origin = { 0, 5 }, .size = { bounds.size.w, 70 } });
     text_layer_set_background_color(stopname_layer_berg, GColorClear);
     text_layer_set_text_color(stopname_layer_berg, GColorWhite);
     text_layer_set_text(stopname_layer_berg, "Østre Berg");
     text_layer_set_text_alignment(stopname_layer_berg, GTextAlignmentCenter);
     layer_add_child(window_layer, text_layer_get_layer(stopname_layer_berg));
 
-    stopname_layer_ila = text_layer_create((GRect) { .origin = { 0, 90 }, .size = { bounds.size.w, 42 } });
+    stopname_layer_ila = text_layer_create((GRect) { .origin = { 0, 80 }, .size = { bounds.size.w, 80 } });
     text_layer_set_background_color(stopname_layer_ila, GColorClear);
     text_layer_set_text_color(stopname_layer_ila, GColorWhite);
     text_layer_set_text(stopname_layer_ila, "Ila");
@@ -56,31 +51,32 @@ static void main_window_unload(Window *window) {
 static void inbox_received_callback(DictionaryIterator *iter, void *context) {
     APP_LOG(APP_LOG_LEVEL_INFO, "Message recieved from JS");
     
-    static char stop_buffer[16];
-    static char time_buffer[40];
-    static char time_buffer1[40];
+    static char time_buffer0[54];
+    static char time_buffer1[54];
     
     Tuple *t = dict_read_first(iter);
 
     while (t != NULL) {
         switch (t->key) {
-        case KEY_BUSID_BERG:
-            snprintf(time_buffer, sizeof(time_buffer), "%s", t->value->cstring);
+        case KEY_BUSID_0:
+            snprintf(time_buffer0, sizeof(time_buffer0), "%s", t->value->cstring);
             break;
-        case KEY_BUSID_ILA:
-            snprintf(time_buffer, sizeof(time_buffer), "%s", t->value->cstring);
-            break;
+        case KEY_BUSID_1:
+            snprintf(time_buffer1, sizeof(time_buffer1), "%s", t->value->cstring);
+            APP_LOG(APP_LOG_LEVEL_INFO, time_buffer1);
+            break; 
         default:
             APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
             break;
         }
         t = dict_read_next(iter);
     }
-    //text_layer_set_text(stopname_layer, stop_buffer);
-    //text_layer_set_font(stopname_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+    
+    text_layer_set_text(stopname_layer_berg, time_buffer0);
+    text_layer_set_font(stopname_layer_berg, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
 
-    //text_layer_set_text(stoptime_layer, time_buffer);
-    //text_layer_set_font(stoptime_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+    text_layer_set_text(stopname_layer_ila, time_buffer1);
+    text_layer_set_font(stopname_layer_ila, fonts_get_system_font(FONT_KEY_GOTHIC_18));
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
