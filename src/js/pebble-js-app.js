@@ -1,6 +1,7 @@
 var locationOptions = {timeout: 15000, maximumAge: 60000},
-    stopId1 = window.localStorage.getItem('stopId1') ? window.localStorage.getItem('stopId1') : '16011567', // Østre Berg
-    stopId2 = window.localStorage.getItem('stopId2') ? window.localStorage.getItem('stopId2') : '16011192'; // Ila
+    stopId1 = window.localStorage.getItem('stopId1') ? window.localStorage.getItem('stopId1') : '16010333', // Gløshaugen Nord - fra midtbyen
+    stopId2 = window.localStorage.getItem('stopId2') ? window.localStorage.getItem('stopId2') : '16010907'; // Kongens Gate K2 
+    route = window.localStorage.getItem('route') ? window.localStorage.getItem('route') : ''; // No default
 
 var dictionary;
 
@@ -57,8 +58,12 @@ var Bus = ( function () {
             var departureList = [];
             departureList.push(place.name);
             for (var i = 0; i < place.next.length; i++) {
-                if (place.next[i].l === "5") {
-                    departureList.push(place.next[i]);
+                if (route !== "") {
+                    if (place.next[i].l === route) {
+                        departureList.push(place.next[i]);
+                    } 
+                } else {
+                        departureList.push(place.next[i]);
                 }
                 if (departureList.length === 4) {
                     break;
@@ -68,10 +73,15 @@ var Bus = ( function () {
         }, 
         printInfo: function(list) {
             var row = "";
-            for (var i = 1; i < list.length; i++) {
-                console.log(list[i].t.substring(11, 16) + " - " + this.calcTime(list[i].t));
-                row += list[i].l + ": " + list[i].t.substring(11, 16) + " - " + this.calcTime(list[i].t) + "\n";
+            if (list.length > 1) {
+                for (var i = 1; i < list.length; i++) {
+                    console.log(list[i].t.substring(11, 16) + " - " + this.calcTime(list[i].t));
+                    row += list[i].l + ": " + list[i].t.substring(11, 16) + " - " + this.calcTime(list[i].t) + "\n";
+                }
+            } else {
+                row += route + ": ingen avganger"; 
             }
+            
             console.log("List name: " + list[0]);
             console.log("If check: " + currentRequest + " and " + stopId1);
             if (currentRequest === stopId1) { 
@@ -116,7 +126,7 @@ Pebble.addEventListener('appmessage',
 
 Pebble.addEventListener('showConfiguration', function() {
     console.log("Showing Config Menu");
-    var url = "https://hakloev.no/static/files/config.html?stopId1=" + stopId1 + "&stopId2=" + stopId2;
+    var url = "https://hakloev.no/static/files/config.html?stopId1=" + stopId1 + "&stopId2=" + stopId2 + "&route=" + route;
     console.log("Config Menu url: " + url);
     Pebble.openURL(url);
 });
@@ -127,14 +137,13 @@ Pebble.addEventListener('webviewclosed', function(e) {
     console.log("Options: " + JSON.stringify(options));
     stopId1 = encodeURIComponent(options.stopId1);
     stopId2 = encodeURIComponent(options.stopId2);
-    if (stopId1 == 'undefined') {
-        stopId1 = '16011567'; // Berg
-    }
-    if (stopId2 == 'undefined') {
-        stopId2 = '16011192'; // Ila
-    }
+    route = encodeURIComponent(options.route);
+    if (stopId1 == 'undefined') { stopId1 = '16010333'; } // Gløshaugen Nord
+    if (stopId2 == 'undefined') { stopId2 = '16010907'; } // Kongens Gate K2
+    if (route == 'undefined') { route = ''; } // No default 
     window.localStorage.setItem('stopId1', stopId1);
     window.localStorage.setItem('stopId2', stopId2);
-    console.log("stopId1: " + stopId1 + " stopId2: " + stopId2);
+    window.localStorage.setItem('route', route);
+    console.log("stopId1: " + stopId1 + " stopId2: " + stopId2 + " route: " + route);
     Bus.getBusInfo();
 });
