@@ -1,6 +1,7 @@
 {
     "appKeys": {
-        "dummy": 0
+        "stopId1": 0,
+        "stopId2": 1
     },
     "capabilities": [
         "configurable"

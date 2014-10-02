@@ -1,32 +1,38 @@
+var locationOptions = {timeout: 15000, maximumAge: 60000},
+    stopId1 = window.localStorage.getItem('stopId1') ? window.localStorage.getItem('stopId1') : '16011567', // Østre Berg
+    stopId2 = window.localStorage.getItem('stopId2') ? window.localStorage.getItem('stopId2') : '16011192'; // Ila
+
+var dictionary;
+
 var Bus = ( function () {
     
     var busInfoUrl = "http://bybussen.api.tmn.io/rt/";
-    var berg = "16011567";
-    var ila = "16011192";
-    var dictionary;
+    var currentRequest;
     
     return {
         getBusInfo: function() {
             dictionary = {};
+            currentRequest = stopId1;
             var self = this; // Needed to access parseInfo in callback function
-            this.xmlReq(busInfoUrl + berg, "GET", 
+            this.xmlReq(busInfoUrl + stopId1, "GET", 
                 function(responseText) {
                     var json = JSON.parse(responseText);
                     self.parseInfo(json);
+                    currentRequest = stopId2;
                 }
             );
-            this.xmlReq(busInfoUrl + ila, "GET",
+            this.xmlReq(busInfoUrl + stopId2, "GET",
                 function(responseText) {
                     var json = JSON.parse(responseText);
-                    self.parseInfo(json);
+                     self.parseInfo(json);
                 }
-            );
+            );          
             Pebble.sendAppMessage(dictionary,
                 function(e) {
-                    console.log("Sent departures to pebble");
-                    console.log(Object.keys(dictionary).length);
+                    console.log("Sent departures to Pebble");
+                    console.log("Dict length: " + Object.keys(dictionary).length);
                     for (var key in dictionary) {
-                        console.log(dictionary[key]);
+                        console.log("Dict key: " + key + " | Dict value: " + dictionary[key]);
                     }
                 },
                 function(e) {
@@ -48,7 +54,6 @@ var Bus = ( function () {
             xhr.send();
         }, 
         parseInfo: function(place) {
-            console.log("INFO: parseInfo called");
             var departureList = [];
             departureList.push(place.name);
             for (var i = 0; i < place.next.length; i++) {
@@ -62,16 +67,19 @@ var Bus = ( function () {
             this.printInfo(departureList);
         }, 
         printInfo: function(list) {
-            console.log("INFO: printInfo called");
             var row = "";
             for (var i = 1; i < list.length; i++) {
                 console.log(list[i].t.substring(11, 16) + " - " + this.calcTime(list[i].t));
                 row += list[i].t.substring(11, 16) + " - " + this.calcTime(list[i].t) + "\n";
             }
-            if (list[0] === "Ila") {
-                dictionary["1"] = row;
+            console.log("List name: " + list[0]);
+            console.log("If check: " + currentRequest + " and " + stopId1);
+            if (currentRequest === stopId1) { 
+                dictionary["0"] = list[0];
+                dictionary["2"] = row;
             } else {
-                dictionary["0"] = row;                
+                dictionary["1"] = list[0];
+                dictionary["3"] = row;                
             }
         },
         calcTime: function(time) {
@@ -107,11 +115,25 @@ Pebble.addEventListener('appmessage',
 );
 
 Pebble.addEventListener('showConfiguration', function() {
-    console.log("showing configmenu");
+    console.log("Showing Config Menu");
+    var url = "https://hakloev.no/static/files/config.html?stopId1=" + stopId1 + "&stopId2=" + stopId2;
+    console.log("Config Menu url: " + url);
+    Pebble.openURL(url);
 });
 
 Pebble.addEventListener('webviewclosed', function(e) {
-    console.log("config closed");
+    console.log("Config Closed");
     var options = JSON.parse(decodeURIComponent(e.response));
     console.log("Options: " + JSON.stringify(options));
+    stopId1 = encodeURIComponent(options.stopId1);
+    stopId2 = encodeURIComponent(options.stopId2);
+    if (stopId1 == 'undefined') {
+        stopId1 = '16011567'; // Berg
+    }
+    if (stopId2 == 'undefined') {
+        stopId2 = '16011192'; // Ila
+    }
+    window.localStorage.setItem('stopId1', stopId1);
+    window.localStorage.setItem('stopId2', stopId2);
+    console.log("stopId1: " + stopId1 + " stopId2: " + stopId2);
 });
