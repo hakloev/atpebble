@@ -70,7 +70,7 @@ var Bus = ( function () {
             var row = "";
             for (var i = 1; i < list.length; i++) {
                 console.log(list[i].t.substring(11, 16) + " - " + this.calcTime(list[i].t));
-                row += list[i].t.substring(11, 16) + " - " + this.calcTime(list[i].t) + "\n";
+                row += list[i].l + ": " + list[i].t.substring(11, 16) + " - " + this.calcTime(list[i].t) + "\n";
             }
             console.log("List name: " + list[0]);
             console.log("If check: " + currentRequest + " and " + stopId1);
@@ -136,4 +136,5 @@ Pebble.addEventListener('webviewclosed', function(e) {
     window.localStorage.setItem('stopId1', stopId1);
     window.localStorage.setItem('stopId2', stopId2);
     console.log("stopId1: " + stopId1 + " stopId2: " + stopId2);
+    Bus.getBusInfo();
 });

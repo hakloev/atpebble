@@ -1,10 +1,12 @@
 #include <pebble.h>
 
-#define KEY_STOPNAME_0 0
-#define KEY_STOPNAME_1 1
-#define KEY_BUSID_0 2
-#define KEY_BUSID_1 3
-#define KEY_ERROR 4
+enum {
+    KEY_STOPNAME_0 = 0x0,
+    KEY_STOPNAME_1 = 0x1,
+    KEY_BUSID_0 = 0x2,
+    KEY_BUSID_1 = 0x3,
+    KEY_ERROR = 0x4
+}; 
     
 static Window *window;
 static TextLayer *stopname_layer_0;
@@ -74,8 +76,8 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
     
     static char name_buffer0[12];
     static char name_buffer1[12];
-    static char time_buffer0[54];
-    static char time_buffer1[54];
+    static char time_buffer0[63];
+    static char time_buffer1[63];
     
     Tuple *t = dict_read_first(iter);
 
