@@ -126,7 +126,7 @@ Pebble.addEventListener('appmessage',
 
 Pebble.addEventListener('showConfiguration', function() {
     console.log("Showing Config Menu");
-    var url = "https://hakloev.no/static/files/config.html?stopId1=" + stopId1 + "&stopId2=" + stopId2 + "&route=" + route;
+    var url = "https://navi.hakloev.no/static/files/config.html?stopId1=" + stopId1 + "&stopId2=" + stopId2 + "&route=" + route;
     console.log("Config Menu url: " + url);
     Pebble.openURL(url);
 });
