@@ -9,6 +9,8 @@ By default the app uses the two stops "Gløshaugen Nord - til midtbyen" and "Kon
 
 ### Licensing
 
+This projected is licensed under the terms of the MIT license.
+
 All the realtime is gathered from the public api [bybussen.api.tmn.io](http://bybussen.api.tmn.io).
 
 The app is based upon [tmn](https://github.com/tmn/)'s [Bybussen-Pebble](https://github.com/tmn/Bybussen-Pebble/).
