@@ -1,6 +1,11 @@
 atpebble
 ===================
 
-Repo for hosting pebble watchapp, showing bus information in Trondheim. Work in progress
+Repo for hosting a pebble watchapp. 
+The app shows bus information in Trondheim. 
 
-Based on tmn's Bybussen-Pebble
+Based on [https://github.com/tmn/](tmn)'s [https://github.com/tmn/Bybussen-Pebble/](Bybussen-Pebble)
+
+
+Work in progress
+
