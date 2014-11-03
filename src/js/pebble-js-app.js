@@ -25,33 +25,32 @@ var Bus = ( function () {
     };
     
     var parseInfo = function(place) {
-            var departureList = [];
-            departureList.push(place.name);
-            for (var i = 0; i < place.next.length; i++) {
-                if ((route !== "") && (place.next[i].l === route)) {
+        var departureList = [];
+        departureList.push(place.name);
+        for (var i = 0; i < place.next.length; i++) {
+            if (route != "") {
+                if (place.next[i].l == route) {
                     departureList.push(place.next[i]); 
-                } else {
-                    departureList.push(place.next[i]);
                 }
-                if (departureList.length === 4) {
-                    break;
-                }
+            } else {
+                departureList.push(place.next[i]);
             }
-            printInfo(departureList);
+            if (departureList.length === 4) {
+               break;
+            }
+        }
+        printInfo(departureList);
     };
     
     var printInfo = function(list) {
         var row = "";
         if (list.length > 1) {
            for (var i = 1; i < list.length; i++) {
-                console.log(list[i].t.substring(11, 16) + " - " + calcTime(list[i].t));
                 row += list[i].l + ": " + list[i].t.substring(11, 16) + " - " + calcTime(list[i].t) + "\n";
             }
         } else {
             row += route + ": ingen avganger"; 
         }   
-        console.log("List name: " + list[0]);
-        console.log("If check: " + currentRequest + " and " + stopId1);
         if (currentRequest === stopId1) { 
             dictionary["0"] = list[0];
             dictionary["2"] = row;
@@ -62,7 +61,6 @@ var Bus = ( function () {
     };
     
     var calcTime = function(time) {
-        console.log("INFO: calcTime called");
         var d = time.match(/^(\d{2}).(\d{2}).(\d{4}) (\d{2}):(\d{2})$/);
         var today = new Date();
         var departure = new Date(d[3], d[2] - 1, d[1], d[4], d[5]);
@@ -125,7 +123,6 @@ Pebble.addEventListener('appmessage',
 );
 
 Pebble.addEventListener('showConfiguration', function() {
-    console.log("Showing Config Menu");
     var url = "https://navi.hakloev.no/static/files/config.html?stopId1=" + stopId1 + "&stopId2=" + stopId2 + "&route=" + route;
     console.log("Config Menu url: " + url);
     Pebble.openURL(url);
@@ -138,12 +135,12 @@ Pebble.addEventListener('webviewclosed', function(e) {
     stopId1 = encodeURIComponent(options.stopId1);
     stopId2 = encodeURIComponent(options.stopId2);
     route = encodeURIComponent(options.route);
-    if (stopId1 == 'undefined') { stopId1 = '16010333'; } // Gløshaugen Nord
-    if (stopId2 == 'undefined') { stopId2 = '16010907'; } // Kongens Gate K2
-    if (route == 'undefined') { route = ''; } // No default 
+    if (stopId1 == "") { stopId1 = '16010333'; } // Gløshaugen Nord
+    if (stopId2 == "") { stopId2 = '16010907'; } // Kongens Gate K2
+    if (route == "") { route = ''; } // No default 
+    console.log("DEBUG route", route);
     window.localStorage.setItem('stopId1', stopId1);
     window.localStorage.setItem('stopId2', stopId2);
     window.localStorage.setItem('route', route);
-    console.log("stopId1: " + stopId1 + " stopId2: " + stopId2 + " route: " + route);
     Bus.getBusInfo();
 });
