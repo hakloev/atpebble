@@ -27,9 +27,11 @@ var Bus = ( function () {
     var parseInfo = function(place) {
         var departureList = [];
         departureList.push(place.name);
+        //routeList = route.split('%2C')
+        routeList = route.split(',')
         for (var i = 0; i < place.next.length; i++) {
-            if (route != "") {
-                if (place.next[i].l == route) {
+            if (routeList.length !== 1) {
+                if (routeList.indexOf(place.next[i].l) !== -1) {
                     departureList.push(place.next[i]); 
                 }
             } else {
@@ -49,7 +51,7 @@ var Bus = ( function () {
                 row += list[i].l + ": " + list[i].t.substring(11, 16) + " - " + calcTime(list[i].t) + "\n";
             }
         } else {
-            row += route + ": ingen avganger"; 
+            row += route.split(',').join(', ') + "\ningen avganger"; 
         }   
         if (currentRequest === stopId1) { 
             dictionary["0"] = list[0];
@@ -123,7 +125,7 @@ Pebble.addEventListener('appmessage',
 );
 
 Pebble.addEventListener('showConfiguration', function() {
-    var url = "https://navi.hakloev.no/static/files/config.html?stopId1=" + stopId1 + "&stopId2=" + stopId2 + "&route=" + route;
+    var url = "https://navi.hakloev.no/static/files/atpebble/config.html?stopId1=" + stopId1 + "&stopId2=" + stopId2 + "&route=" + route;
     console.log("Config Menu url: " + url);
     Pebble.openURL(url);
 });
@@ -134,11 +136,10 @@ Pebble.addEventListener('webviewclosed', function(e) {
     console.log("Options: " + JSON.stringify(options));
     stopId1 = encodeURIComponent(options.stopId1);
     stopId2 = encodeURIComponent(options.stopId2);
-    route = encodeURIComponent(options.route);
+    route = options.route;
     if (stopId1 == "") { stopId1 = '16010333'; } // Gløshaugen Nord
     if (stopId2 == "") { stopId2 = '16010907'; } // Kongens Gate K2
     if (route == "") { route = ''; } // No default 
-    console.log("DEBUG route", route);
     window.localStorage.setItem('stopId1', stopId1);
     window.localStorage.setItem('stopId2', stopId2);
     window.localStorage.setItem('route', route);
