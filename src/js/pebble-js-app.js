@@ -1,39 +1,37 @@
-var locationOptions = {timeout: 15000, maximumAge: 60000},
-    stopId1 = window.localStorage.getItem('stopId1') ? window.localStorage.getItem('stopId1') : '16010333', // Gløshaugen Nord - fra midtbyen
-    stopId2 = window.localStorage.getItem('stopId2') ? window.localStorage.getItem('stopId2') : '16010907'; // Kongens Gate K2 
-    route = window.localStorage.getItem('route') ? window.localStorage.getItem('route') : ''; // No default
-
-var dictionary;
+//var locationOptions = {timeout: 15000, maximumAge: 60000},
+//    stopId1 = window.localStorage.getItem('stopId1') ? window.localStorage.getItem('stopId1') : '16010333', // Gløshaugen Nord - fra midtbyen
+//    stopId2 = window.localStorage.getItem('stopId2') ? window.localStorage.getItem('stopId2') : '16010907'; // Kongens Gate K2 
+//    route = window.localStorage.getItem('route') ? window.localStorage.getItem('route') : ''; // No default
+    
 
 var Bus = ( function () {
     
     var busInfoUrl = "http://bybussen.api.tmn.io/rt/";
     var currentRequest;
+    var dictionary;
     
     var xmlReq = function(url, type, callback) {
-            var xhr = new XMLHttpRequest();
-            xhr.onload = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    console.log('INFO: Callback in XMLHttpRequest');
-                    callback(this.responseText);
-                } else {
-                    console.log('ERROR: XMLHttpRequest failed, nothing to display in DOM');
-                }
-            };
-            xhr.open(type, url, false);
-            xhr.send();
+        var xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                console.log('INFO: Callback in XMLHttpRequest');
+                callback(this.responseText);
+            } else {
+                console.log('ERROR: XMLHttpRequest failed, nothing to display in DOM');
+            }
+        };
+        xhr.open(type, url, false);
+        xhr.send();
     };
     
     var parseInfo = function(place) {
         var departureList = [];
         departureList.push(place.name);
-        console.log("Route", route.length)
         if (route.length > 0) {
             routeList = route.split(',')
-            console.log(routeList.length, routeList)
         }
         for (var i = 0; i < place.next.length; i++) {
-            if (route.length == 0) {
+            if (route.length === 0) {
                 departureList.push(place.next[i]);    
             } else if (routeList.indexOf(place.next[i].l) !== -1) {
                 departureList.push(place.next[i]); 
@@ -95,9 +93,8 @@ var Bus = ( function () {
             Pebble.sendAppMessage(dictionary,
                 function(e) {
                     console.log("Sent departures to Pebble");
-                    console.log("Dict length: " + Object.keys(dictionary).length);
                     for (var key in dictionary) {
-                        console.log("Dict key: " + key + " | Dict value: " + dictionary[key]);
+                        console.log("Key: " + key + " --> Value: " + dictionary[key]);
                     }
                 },
                 function(e) {
@@ -110,39 +107,44 @@ var Bus = ( function () {
 
 Pebble.addEventListener('ready',
     function(e) {
-        console.log("JS ready to recieve");
-        // initial fetch here
+        // Initial fetch here
         Bus.getBusInfo();
-        
     }        
 );
 
 Pebble.addEventListener('appmessage', 
     function(e) {
-        console.log("AppMessage received from Pebble");
-        // fetch here
+        // Fetch here
         Bus.getBusInfo();
     }      
 );
 
 Pebble.addEventListener('showConfiguration', function() {
-    var url = "https://navi.hakloev.no/static/files/atpebble/config.html?stopId1=" + stopId1 + "&stopId2=" + stopId2 + "&route=" + route;
-    console.log("Config Menu url: " + url);
+    var url = "https://navi.hakloev.no/static/files/atpebble/config.html?
+    
+    for (var i = 0; i < window.localStorage.length; i++) {
+        var key = window.localStorage.key(i);
+        var value = window.localStorage.getItem(key);
+        if (val != null) {
+            if (i === 0) {
+                url += encodeURIComponent(key) + "=" + encodeURIComponent(val);
+            } else {
+                url += "&" + encodeURIComponent(key) + "=" + encodeURIComponent(val);
+            }
+        }
+    }
+    console.log("Config URL:", url);
     Pebble.openURL(url);
 });
 
 Pebble.addEventListener('webviewclosed', function(e) {
     console.log("Config Closed");
-    var options = JSON.parse(decodeURIComponent(e.response));
-    console.log("Options: " + JSON.stringify(options));
-    stopId1 = encodeURIComponent(options.stopId1);
-    stopId2 = encodeURIComponent(options.stopId2);
-    route = options.route;
-    if (stopId1 == "") { stopId1 = '16010333'; } // Gløshaugen Nord
-    if (stopId2 == "") { stopId2 = '16010907'; } // Kongens Gate K2
-    if (route == "") { route = ''; } // No default 
-    window.localStorage.setItem('stopId1', stopId1);
-    window.localStorage.setItem('stopId2', stopId2);
-    window.localStorage.setItem('route', route);
+    if (e.response) {
+        var values = JSON.parse(decodeURIComponent(e.response));
+        console.log("Values: ", JSON.stringify(values));
+        for (var key in values) {
+            window.locaStorage.setItem(key, values[key]);
+        }   
+    }
     Bus.getBusInfo();
 });
