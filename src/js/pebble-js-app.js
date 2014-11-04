@@ -27,16 +27,17 @@ var Bus = ( function () {
     var parseInfo = function(place) {
         var departureList = [];
         departureList.push(place.name);
-        //routeList = route.split('%2C')
-        routeList = route.split(',')
+        console.log("Route", route.length)
+        if (route.length > 0) {
+            routeList = route.split(',')
+            console.log(routeList.length, routeList)
+        }
         for (var i = 0; i < place.next.length; i++) {
-            if (routeList.length !== 1) {
-                if (routeList.indexOf(place.next[i].l) !== -1) {
-                    departureList.push(place.next[i]); 
-                }
-            } else {
-                departureList.push(place.next[i]);
-            }
+            if (route.length == 0) {
+                departureList.push(place.next[i]);    
+            } else if (routeList.indexOf(place.next[i].l) !== -1) {
+                departureList.push(place.next[i]); 
+            } 
             if (departureList.length === 4) {
                break;
             }
