@@ -46,13 +46,9 @@ var Bus = ( function () {
         } else {
             row += window.localStorage.getItem('route').split(',').join(', ') + "\ningen avganger"; 
         }   
-        if (currentRequest === window.localStorage.getItem('stopId1')) { 
-            dictionary["0"] = list[0];
-            dictionary["1"] = row;
-        } else {
-            dictionary["2"] = list[0];
-            dictionary["3"] = row;                
-        }
+        console.log("derp", Object.keys(dictionary).length);
+        dictionary[(Object.keys(dictionary).length).toString()] = list[0];
+        dictionary[(Object.keys(dictionary).length).toString()] = row;
     };
     
     var calcTime = function(time, realtime) {
@@ -70,12 +66,10 @@ var Bus = ( function () {
     return {
         getBusInfo: function() {
             dictionary = {};
-            currentRequest = window.localStorage.getItem('stopId1');
             xmlReq(busInfoUrl + window.localStorage.getItem('stopId1'), "GET", 
                 function(responseText) {
                     var json = JSON.parse(responseText);
                     parseInfo(json);
-                    currentRequest = window.localStorage.getItem('stopId2');
                 }
             );
             xmlReq(busInfoUrl + window.localStorage.getItem('stopId2'), "GET",
