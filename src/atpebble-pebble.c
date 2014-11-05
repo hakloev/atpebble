@@ -2,8 +2,8 @@
 
 enum {
     KEY_STOPNAME_0 = 0x0,
-    KEY_STOPNAME_1 = 0x1,
-    KEY_BUSID_0 = 0x2,
+    KEY_BUSID_0 = 0x1,
+    KEY_STOPNAME_1 = 0x2,
     KEY_BUSID_1 = 0x3,
     KEY_ERROR = 0x4
 }; 
@@ -104,8 +104,8 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
     
     static char name_buffer0[18];
     static char name_buffer1[18];
-    static char time_buffer0[63];
-    static char time_buffer1[63];
+    static char time_buffer0[80];
+    static char time_buffer1[80];
     
     Tuple *t = dict_read_first(iter);
 
