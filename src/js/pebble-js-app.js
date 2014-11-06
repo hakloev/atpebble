@@ -1,22 +1,8 @@
+// Module Bus, containing logic for parsing information from API
 var Bus = ( function () {
     
     var busInfoUrl = "http://bybussen.api.tmn.io/rt/";
-    var currentRequest;
     var dictionary;
-    
-    var xmlReq = function(url, type, callback) {
-        var xhr = new XMLHttpRequest();
-        xhr.onload = function () {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                console.log('INFO: Callback in XMLHttpRequest');
-                callback(this.responseText);
-            } else {
-                console.log('ERROR: XMLHttpRequest failed, nothing to display in DOM');
-            }
-        };
-        xhr.open(type, url, false);
-        xhr.send();
-    };
     
     var parseInfo = function(place) {
         var departureList = [];
@@ -41,12 +27,11 @@ var Bus = ( function () {
         var row = "";
         if (list.length > 1) {
            for (var i = 1; i < list.length; i++) {
-                row += list[i].l + ": " + list[i].t.substring(11, 16) + " - " + calcTime(list[i].t, list[i].rt) + " (ST)\n";
+                row += (list[i].l + ": " + list[i].t.substring(11, 16) + " - " + calcTime(list[i].t, list[i].rt) + "\n");
             }
         } else {
-            row += window.localStorage.getItem('route').split(',').join(', ') + "\ningen avganger"; 
+            row += (window.localStorage.getItem('route').split(',').join(', ') + "\ningen avganger"); 
         }   
-        console.log("derp", Object.keys(dictionary).length);
         dictionary[(Object.keys(dictionary).length).toString()] = list[0];
         dictionary[(Object.keys(dictionary).length).toString()] = row;
     };
@@ -57,9 +42,9 @@ var Bus = ( function () {
         var departure = new Date(d[3], d[2] - 1, d[1], d[4], d[5]);
         var diff = Math.floor((departure.getTime() - today.getTime()) / (1000 * 60));
         if (diff <= -1 || diff <= 0) {
-            return realtime ? "nå" : "ca nå";
+            return realtime ? "nå (S)" : "ca nå";
         } else {
-            return (realtime ? "" : "ca ") + diff + " min";
+            return (realtime ? (diff + " min (S)") : "ca " + diff + " min");
         }   
     };
     
@@ -93,20 +78,36 @@ var Bus = ( function () {
     };
 })();
 
+// AJAX-function
+function xmlReq(url, type, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                console.log('INFO: Callback in XMLHttpRequest');
+                callback(this.responseText);
+            } else {
+                console.log('ERROR: XMLHttpRequest failed, nothing to display in DOM');
+            }
+        };
+        xhr.open(type, url, false);
+        xhr.send();
+} 
+
+// Pebble ready to receive, does the initial fetch. Will not be able to fetch before localStorage is set
 Pebble.addEventListener('ready',
     function(e) {
-        // Initial fetch here
         Bus.getBusInfo();
     }        
 );
 
+// Pebble wants new information
 Pebble.addEventListener('appmessage', 
     function(e) {
-        // Fetch here
         Bus.getBusInfo();
     }      
 );
 
+// Show settings menu
 Pebble.addEventListener('showConfiguration', function() {
     var url = "https://navi.hakloev.no/static/files/atpebble/config.html?";
     
@@ -121,10 +122,11 @@ Pebble.addEventListener('showConfiguration', function() {
             }
         }
     }
-    console.log("Config URL:", url);
+    console.log("Settings-URL: ", url);
     Pebble.openURL(url);
 });
 
+// Save new settings
 Pebble.addEventListener('webviewclosed', function(e) {
     console.log("Config Closed");
     if (e.response) {
