@@ -16,7 +16,7 @@ var Bus = ( function () {
             } else if (routeList.indexOf(place.next[i].l) !== -1) {
                 departureList.push(place.next[i]); 
             } 
-            if (departureList.length === 4) {
+            if (departureList.length === 5) {
                break;
             }
         }

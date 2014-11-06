@@ -54,32 +54,32 @@ static void main_window_load(Window *window) {
 
     // Origin = coordinate of upper-lefthand corner of rectangle
     // Size = size of rectangle
-    stopname_layer_0 = text_layer_create((GRect) { .origin = { 0, -3 }, .size = { bounds.size.w, 22 } });
-    text_layer_set_background_color(stopname_layer_0, GColorBlack);
+    stopname_layer_0 = text_layer_create((GRect) { .origin = { 0, -4 }, .size = { bounds.size.w, 22 } });
+    text_layer_set_background_color(stopname_layer_0, GColorClear);
     text_layer_set_text_color(stopname_layer_0, GColorWhite);
     text_layer_set_text(stopname_layer_0, "");
     text_layer_set_text_alignment(stopname_layer_0, GTextAlignmentCenter);
     layer_add_child(window_layer, text_layer_get_layer(stopname_layer_0));
     
-    stoptime_layer_0 = text_layer_create((GRect) { .origin = { 0, 14  }, .size = { bounds.size.w, 60 } });
+    stoptime_layer_0 = text_layer_create((GRect) { .origin = { 20, 14  }, .size = { bounds.size.w, 60 } });
     text_layer_set_background_color(stoptime_layer_0, GColorClear);
     text_layer_set_text_color(stoptime_layer_0, GColorWhite);
     text_layer_set_text(stoptime_layer_0, "");
-    text_layer_set_text_alignment(stoptime_layer_0, GTextAlignmentCenter);
+    text_layer_set_text_alignment(stoptime_layer_0, GTextAlignmentLeft);
     layer_add_child(window_layer, text_layer_get_layer(stoptime_layer_0));
 
-    stopname_layer_1 = text_layer_create((GRect) { .origin = { 0, 70 }, .size = { bounds.size.w, 22 } });
-    text_layer_set_background_color(stopname_layer_1, GColorBlack);
+    stopname_layer_1 = text_layer_create((GRect) { .origin = { 0, 68 }, .size = { bounds.size.w, 22 } });
+    text_layer_set_background_color(stopname_layer_1, GColorClear);
     text_layer_set_text_color(stopname_layer_1, GColorWhite);
     text_layer_set_text(stopname_layer_1, "");
     text_layer_set_text_alignment(stopname_layer_1, GTextAlignmentCenter);
     layer_add_child(window_layer, text_layer_get_layer(stopname_layer_1));
     
-    stoptime_layer_1 = text_layer_create((GRect) { .origin = { 0, 88 }, .size = { bounds.size.w, 60 } });
+    stoptime_layer_1 = text_layer_create((GRect) { .origin = { 20, 86 }, .size = { bounds.size.w, 60 } });
     text_layer_set_background_color(stoptime_layer_1, GColorClear);
     text_layer_set_text_color(stoptime_layer_1, GColorWhite);
     text_layer_set_text(stoptime_layer_1, "");
-    text_layer_set_text_alignment(stoptime_layer_1, GTextAlignmentCenter);
+    text_layer_set_text_alignment(stoptime_layer_1, GTextAlignmentLeft);
     layer_add_child(window_layer, text_layer_get_layer(stoptime_layer_1));
 
     refreshing_layer = text_layer_create((GRect) { .origin = { 0, 50 }, .size = { bounds.size.w, 100 } });
@@ -102,10 +102,10 @@ static void main_window_unload(Window *window) {
 static void inbox_received_callback(DictionaryIterator *iter, void *context) {
     APP_LOG(APP_LOG_LEVEL_INFO, "Message recieved from JS");
     
-    static char name_buffer0[18];
-    static char name_buffer1[18];
-    static char time_buffer0[80];
-    static char time_buffer1[80];
+    static char name_buffer0[20];
+    static char name_buffer1[20];
+    static char time_buffer0[90];
+    static char time_buffer1[90];
     
     Tuple *t = dict_read_first(iter);
 
@@ -122,7 +122,6 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
             break;
         case KEY_BUSID_1:
             snprintf(time_buffer1, sizeof(time_buffer1), "%s", t->value->cstring);
-            APP_LOG(APP_LOG_LEVEL_INFO, time_buffer1);
             break; 
         case KEY_ERROR:
             snprintf(name_buffer0, sizeof(name_buffer0), "%s", t->value->cstring);
@@ -141,10 +140,10 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
     text_layer_set_font(stopname_layer_1, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
     
     text_layer_set_text(stoptime_layer_0, time_buffer0);
-    text_layer_set_font(stoptime_layer_0, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+    text_layer_set_font(stoptime_layer_0, fonts_get_system_font(FONT_KEY_GOTHIC_14));
     
     text_layer_set_text(stoptime_layer_1, time_buffer1);
-    text_layer_set_font(stoptime_layer_1, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+    text_layer_set_font(stoptime_layer_1, fonts_get_system_font(FONT_KEY_GOTHIC_14));
     
     set_refreshing_layer(true, false);
 }
